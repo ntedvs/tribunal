@@ -1,0 +1,99 @@
+@import "tailwindcss";
+@source "../node_modules/streamdown/dist/*.js";
+
+@theme {
+  --color-surface: #edeae5;
+  --color-surface-raised: #f5f3f0;
+  --color-ink: #1a1a1a;
+  --color-ink-muted: #8a8580;
+  --color-ink-faint: #b5b0aa;
+  --color-accent: #4a6891;
+  --color-accent-light: #e8edf4;
+  --color-border: #d5d0ca;
+  --color-prosecution: #8b2500;
+  --color-defense: #1a5c3a;
+  --color-judge: #4a6891;
+  --font-serif: "Playfair Display", "Georgia", serif;
+}
+
+@layer base {
+  button {
+    @apply cursor-pointer disabled:cursor-not-allowed;
+  }
+}
+
+html {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* streamdown prose overrides */
+.sd-markdown {
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--color-ink);
+}
+
+.sd-markdown p {
+  margin-bottom: 0.75em;
+}
+
+.sd-markdown strong {
+  font-weight: 600;
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+textarea::placeholder {
+  color: var(--color-ink-faint);
+}
+
+/* thinking dots animation */
+@keyframes pulse-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+.thinking-dot:nth-child(1) {
+  animation: pulse-dot 1.4s infinite 0s;
+}
+.thinking-dot:nth-child(2) {
+  animation: pulse-dot 1.4s infinite 0.2s;
+}
+.thinking-dot:nth-child(3) {
+  animation: pulse-dot 1.4s infinite 0.4s;
+}
+
+/* fade-in for debate steps */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.4s ease-out both;
+}
