@@ -16,7 +16,7 @@ export function ThinkingIndicator({ persona }: { persona: Persona }) {
   return (
     <div className="animate-fade-up flex items-center gap-3 border-t border-border py-8">
       <span
-        className={`text-[0.6875rem] font-semibold uppercase tracking-[0.12em] ${PERSONA_TEXT[persona]}`}
+        className={`text-[0.6875rem] font-semibold tracking-[0.12em] uppercase ${PERSONA_TEXT[persona]}`}
       >
         {LABELS[persona]}
       </span>

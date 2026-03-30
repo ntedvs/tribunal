@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useState, useEffect } from "react"
 import { CaseForm } from "~/components/CaseForm"
 import { PastTribunals } from "~/components/PastTribunals"
 import { listTribunals, saveTribunal } from "~/lib/storage"

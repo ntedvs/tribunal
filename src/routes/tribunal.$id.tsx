@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { DebateView } from "~/components/DebateView"
 import { loadTribunal, saveTribunal, extractVerdict } from "~/lib/storage"
 import type { Persona, TribunalMessage } from "~/lib/types"
@@ -37,11 +37,7 @@ function TribunalPage() {
   )
 
   const startDebate = useCallback(
-    (
-      text: string,
-      startStep: number,
-      prior: TribunalMessage[],
-    ) => {
+    (text: string, startStep: number, prior: TribunalMessage[]) => {
       setIsStreaming(true)
       const controller = new AbortController()
       abortRef.current = controller
@@ -181,19 +177,17 @@ function TribunalPage() {
   }
 
   if (!caseText) {
-    return (
-      <p className="pt-12 text-center text-ink-muted">Case not found.</p>
-    )
+    return <p className="pt-12 text-center text-ink-muted">Case not found.</p>
   }
 
   return (
     <div className="pt-8">
       <div className="mb-2">
-        <span className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-ink-muted">
+        <span className="text-[0.6875rem] font-medium tracking-[0.15em] text-ink-muted uppercase">
           Case Before the Tribunal
         </span>
       </div>
-      <h1 className="font-serif text-3xl font-medium leading-snug tracking-tight md:text-4xl">
+      <h1 className="font-serif text-3xl leading-snug font-medium tracking-tight md:text-4xl">
         {caseText}
       </h1>
 

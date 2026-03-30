@@ -13,7 +13,7 @@
   --color-prosecution: #8b2500;
   --color-defense: #1a5c3a;
   --color-judge: #4a6891;
-  --font-serif: "Playfair Display", "Georgia", serif;
+  --font-serif: "Playfair Display Variable", "Georgia", serif;
 }
 
 @layer base {

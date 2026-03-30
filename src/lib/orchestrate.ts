@@ -1,7 +1,7 @@
 import "dotenv/config"
 import Anthropic from "@anthropic-ai/sdk"
-import { ROUND_STEPS } from "./rounds"
 import { SYSTEM_PROMPTS } from "./prompts"
+import { ROUND_STEPS } from "./rounds"
 import type { Persona } from "./types"
 
 interface SSEEvent {
