@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TribunalIdRouteImport } from './routes/tribunal.$id'
 import { Route as ApiTribunalStreamRouteImport } from './routes/api/tribunal/stream'
+import { Route as ApiTribunalJuryRouteImport } from './routes/api/tribunal/jury'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,34 +29,52 @@ const ApiTribunalStreamRoute = ApiTribunalStreamRouteImport.update({
   path: '/api/tribunal/stream',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTribunalJuryRoute = ApiTribunalJuryRouteImport.update({
+  id: '/api/tribunal/jury',
+  path: '/api/tribunal/jury',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/tribunal/$id': typeof TribunalIdRoute
+  '/api/tribunal/jury': typeof ApiTribunalJuryRoute
   '/api/tribunal/stream': typeof ApiTribunalStreamRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/tribunal/$id': typeof TribunalIdRoute
+  '/api/tribunal/jury': typeof ApiTribunalJuryRoute
   '/api/tribunal/stream': typeof ApiTribunalStreamRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/tribunal/$id': typeof TribunalIdRoute
+  '/api/tribunal/jury': typeof ApiTribunalJuryRoute
   '/api/tribunal/stream': typeof ApiTribunalStreamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/tribunal/$id' | '/api/tribunal/stream'
+  fullPaths:
+    | '/'
+    | '/tribunal/$id'
+    | '/api/tribunal/jury'
+    | '/api/tribunal/stream'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/tribunal/$id' | '/api/tribunal/stream'
-  id: '__root__' | '/' | '/tribunal/$id' | '/api/tribunal/stream'
+  to: '/' | '/tribunal/$id' | '/api/tribunal/jury' | '/api/tribunal/stream'
+  id:
+    | '__root__'
+    | '/'
+    | '/tribunal/$id'
+    | '/api/tribunal/jury'
+    | '/api/tribunal/stream'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   TribunalIdRoute: typeof TribunalIdRoute
+  ApiTribunalJuryRoute: typeof ApiTribunalJuryRoute
   ApiTribunalStreamRoute: typeof ApiTribunalStreamRoute
 }
 
@@ -82,12 +101,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTribunalStreamRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/tribunal/jury': {
+      id: '/api/tribunal/jury'
+      path: '/api/tribunal/jury'
+      fullPath: '/api/tribunal/jury'
+      preLoaderRoute: typeof ApiTribunalJuryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   TribunalIdRoute: TribunalIdRoute,
+  ApiTribunalJuryRoute: ApiTribunalJuryRoute,
   ApiTribunalStreamRoute: ApiTribunalStreamRoute,
 }
 export const routeTree = rootRouteImport

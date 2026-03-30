@@ -7,6 +7,17 @@ export interface TribunalMessage {
   text: string
 }
 
+export interface JurorVote {
+  jurorIndex: number
+  vote: "FOR" | "AGAINST"
+  text: string
+}
+
+export interface JuryResult {
+  votes: JurorVote[]
+  tally: { for: number; against: number }
+}
+
 export interface SavedTribunal {
   id: string
   caseText: string
@@ -14,4 +25,5 @@ export interface SavedTribunal {
   status: "in_progress" | "complete"
   messages: TribunalMessage[]
   verdict: string | null
+  jury?: JuryResult | null
 }

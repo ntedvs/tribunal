@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { DebateView } from "~/components/DebateView"
 import { loadTribunal, saveTribunal, extractVerdict } from "~/lib/storage"
-import type { Persona, TribunalMessage } from "~/lib/types"
+import type { Persona, TribunalMessage, JurorVote, JuryResult } from "~/lib/types"
 
 export const Route = createFileRoute("/tribunal/$id")({
   component: TribunalPage,
@@ -20,6 +20,9 @@ function TribunalPage() {
   const [verdict, setVerdict] = useState<string | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [juryVotes, setJuryVotes] = useState<JurorVote[]>([])
+  const [isJuryPolling, setIsJuryPolling] = useState(false)
+  const [isJuryDone, setIsJuryDone] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
 
   const saveProgress = useCallback(
@@ -137,6 +140,64 @@ function TribunalPage() {
     [saveProgress],
   )
 
+  const pollJury = useCallback(() => {
+    if (isJuryPolling || juryVotes.length > 0) return
+    setIsJuryPolling(true)
+
+    fetch("/api/tribunal/jury", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ caseText, messages, verdict }),
+    })
+      .then(async (response) => {
+        const reader = response.body!.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ""
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+          const parts = buffer.split("\n\n")
+          buffer = parts.pop()!
+
+          for (const part of parts) {
+            if (!part.trim()) continue
+            const lines = part.split("\n")
+            let eventName = ""
+            let eventData = ""
+            for (const line of lines) {
+              if (line.startsWith("event: ")) eventName = line.slice(7)
+              if (line.startsWith("data: ")) eventData = line.slice(6)
+            }
+            if (!eventName || !eventData) continue
+
+            const data = JSON.parse(eventData)
+
+            if (eventName === "juror_complete") {
+              const vote: JurorVote = {
+                jurorIndex: data.jurorIndex,
+                vote: data.vote,
+                text: data.text,
+              }
+              setJuryVotes((prev) => [...prev, vote])
+            } else if (eventName === "jury_done") {
+              const result: JuryResult = { votes: data.votes, tally: data.tally }
+              setIsJuryDone(true)
+              setIsJuryPolling(false)
+              const saved = loadTribunal(id)
+              if (saved) {
+                saveTribunal({ ...saved, jury: result })
+              }
+            }
+          }
+        }
+      })
+      .catch(() => {
+        setIsJuryPolling(false)
+      })
+  }, [caseText, messages, verdict, id, isJuryPolling, juryVotes.length])
+
   useEffect(() => {
     const saved = loadTribunal(id)
     setLoaded(true)
@@ -148,6 +209,10 @@ function TribunalPage() {
       setMessages(saved.messages)
       setVerdict(saved.verdict)
       setIsDone(true)
+      if (saved.jury) {
+        setJuryVotes(saved.jury.votes)
+        setIsJuryDone(true)
+      }
       return
     }
 
@@ -203,6 +268,10 @@ function TribunalPage() {
         isStreaming={isStreaming}
         isDone={isDone}
         verdict={verdict}
+        juryVotes={juryVotes}
+        isJuryPolling={isJuryPolling}
+        isJuryDone={isJuryDone}
+        onPollJury={pollJury}
       />
     </div>
   )

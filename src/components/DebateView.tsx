@@ -5,7 +5,8 @@ import {
   getPhaseIndexForStep,
   getSlotForStep,
 } from "~/lib/phases"
-import type { Persona, TribunalMessage } from "~/lib/types"
+import type { Persona, TribunalMessage, JurorVote } from "~/lib/types"
+import { JuryPanel } from "./JuryPanel"
 import { PhaseRow } from "./PhaseRow"
 import { StageTimeline } from "./StageTimeline"
 import { ThinkingIndicator } from "./ThinkingIndicator"
@@ -19,6 +20,10 @@ interface Props {
   isStreaming: boolean
   isDone: boolean
   verdict: string | null
+  juryVotes: JurorVote[]
+  isJuryPolling: boolean
+  isJuryDone: boolean
+  onPollJury: () => void
 }
 
 function isNearBottom(threshold = 80) {
@@ -36,14 +41,18 @@ export function DebateView({
   isStreaming,
   isDone,
   verdict,
+  juryVotes,
+  isJuryPolling,
+  isJuryDone,
+  onPollJury,
 }: Props) {
   const following = useRef(true)
   const touchY = useRef(0)
   const userScrolled = useRef(false)
 
   useEffect(() => {
-    if (isStreaming) following.current = true
-  }, [isStreaming])
+    if (isStreaming || isJuryPolling) following.current = true
+  }, [isStreaming, isJuryPolling])
 
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
@@ -80,12 +89,12 @@ export function DebateView({
   }, [])
 
   useEffect(() => {
-    if (!isStreaming || !following.current) return
+    if ((!isStreaming && !isJuryPolling) || !following.current) return
     window.scrollTo({
       top: document.documentElement.scrollHeight,
       behavior: "smooth",
     })
-  }, [isStreaming, currentText, messages.length])
+  }, [isStreaming, isJuryPolling, currentText, messages.length, juryVotes.length])
 
   const phaseData = groupMessagesIntoPhases(messages)
   const currentStepIndex =
@@ -163,6 +172,17 @@ export function DebateView({
         <p className="pt-8 text-center text-[0.8125rem] text-ink-muted">
           Debate complete.
         </p>
+      )}
+
+      {isDone && verdict && (
+        <JuryPanel
+          votes={juryVotes}
+          isPolling={isJuryPolling}
+          isDone={isJuryDone}
+          verdict={verdict}
+          onPollJury={onPollJury}
+          showButton={!isJuryPolling && juryVotes.length === 0}
+        />
       )}
     </div>
   )
