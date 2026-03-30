@@ -29,7 +29,7 @@ interface Props {
 
 export function MessageBubble({ persona, label, text, isStreaming }: Props) {
   return (
-    <article className="border-t border-border py-8">
+    <article className="py-6">
       <header className="mb-4 flex items-center gap-3">
         <span
           className={`inline-block h-2 w-2 rounded-full ${PERSONA_COLORS[persona]}`}

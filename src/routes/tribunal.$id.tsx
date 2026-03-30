@@ -181,7 +181,7 @@ function TribunalPage() {
   }
 
   return (
-    <div className="pt-8">
+    <div className="mx-auto max-w-6xl pt-8">
       <div className="mb-2">
         <span className="text-[0.6875rem] font-medium tracking-[0.15em] text-ink-muted uppercase">
           Case Before the Tribunal

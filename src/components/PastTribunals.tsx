@@ -8,7 +8,7 @@ export function PastTribunals({ tribunals }: Props) {
   if (tribunals.length === 0) return null
 
   return (
-    <section className="border-t border-border pt-12">
+    <section className="pt-12">
       <h2 className="mb-8 text-[0.6875rem] font-medium tracking-[0.15em] text-ink-muted uppercase">
         Past Cases
       </h2>

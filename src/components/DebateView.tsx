@@ -1,6 +1,13 @@
 import { useEffect, useRef } from "react"
+import {
+  PHASES,
+  groupMessagesIntoPhases,
+  getPhaseIndexForStep,
+  getSlotForStep,
+} from "~/lib/phases"
 import type { Persona, TribunalMessage } from "~/lib/types"
-import { MessageBubble } from "./MessageBubble"
+import { PhaseRow } from "./PhaseRow"
+import { StageTimeline } from "./StageTimeline"
 import { ThinkingIndicator } from "./ThinkingIndicator"
 import { VerdictCard } from "./VerdictCard"
 
@@ -34,7 +41,6 @@ export function DebateView({
   const touchY = useRef(0)
   const userScrolled = useRef(false)
 
-  // Reset follow state when a new stream begins
   useEffect(() => {
     if (isStreaming) following.current = true
   }, [isStreaming])
@@ -56,8 +62,6 @@ export function DebateView({
       }
     }
     const onScroll = () => {
-      // Only let user-initiated scrolls re-enable following.
-      // Ignore scroll events fired by programmatic scrollIntoView.
       if (!userScrolled.current) return
       userScrolled.current = false
       if (isNearBottom()) following.current = true
@@ -83,41 +87,80 @@ export function DebateView({
     })
   }, [isStreaming, currentText, messages.length])
 
+  const phaseData = groupMessagesIntoPhases(messages)
+  const currentStepIndex =
+    isStreaming && currentPersona ? messages.length : null
+  const activePhaseIndex =
+    currentStepIndex !== null ? getPhaseIndexForStep(currentStepIndex) : null
+  const activeSlot =
+    currentStepIndex !== null ? getSlotForStep(currentStepIndex) : null
+
   return (
-    <div className="mt-8 space-y-0">
-      {messages.map((msg, i) =>
-        msg.persona === "judge" ? (
-          <VerdictCard key={i} text={msg.text} verdict={verdict} />
-        ) : (
-          <MessageBubble
-            key={i}
-            persona={msg.persona}
-            label={msg.label}
-            text={msg.text}
-          />
-        ),
-      )}
+    <div className="mt-8">
+      <StageTimeline
+        completedSteps={messages.length}
+        activeStepIndex={currentStepIndex}
+      />
 
-      {isStreaming &&
-        currentPersona &&
-        currentText &&
-        (currentPersona === "judge" ? (
-          <VerdictCard text={currentText} verdict={null} isStreaming />
-        ) : (
-          <MessageBubble
-            persona={currentPersona}
-            label={currentLabel}
-            text={currentText}
-            isStreaming
-          />
-        ))}
+      <div className="mt-6 space-y-10">
+        {PHASES.map((phase, phaseIdx) => {
+          const { left, right } = phaseData[phaseIdx]
+          const isActivePhase = phaseIdx === activePhaseIndex
+          const hasContent = left || right || isActivePhase
 
-      {isStreaming && currentPersona && !currentText && (
-        <ThinkingIndicator persona={currentPersona} />
-      )}
+          if (!hasContent) return null
+
+          // Verdict phase
+          if (phase.type === "solo") {
+            const judgeMsg = left // judge message lands in "left" slot
+            const isStreamingVerdict =
+              isActivePhase && currentPersona === "judge"
+
+            if (!judgeMsg && !isStreamingVerdict) return null
+
+            return (
+              <section
+                key={phase.id}
+                id={`phase-${phase.id}`}
+                className="scroll-mt-20"
+              >
+                <h3 className="mb-4 text-[0.6875rem] font-medium tracking-[0.15em] text-ink-muted uppercase">
+                  {phase.label}
+                </h3>
+                {judgeMsg ? (
+                  <VerdictCard text={judgeMsg.text} verdict={verdict} />
+                ) : isStreamingVerdict && currentText ? (
+                  <VerdictCard text={currentText} verdict={null} isStreaming />
+                ) : isStreamingVerdict ? (
+                  <ThinkingIndicator persona="judge" />
+                ) : null}
+              </section>
+            )
+          }
+
+          // Paired phase
+          const streamingSlot = isActivePhase
+            ? (activeSlot as "left" | "right")
+            : null
+
+          return (
+            <PhaseRow
+              key={phase.id}
+              phase={phase}
+              leftMessage={left}
+              rightMessage={right}
+              streamingSlot={streamingSlot}
+              streamingPersona={isActivePhase ? currentPersona : null}
+              streamingLabel={currentLabel}
+              streamingText={currentText}
+              isThinking={isActivePhase && !!currentPersona && !currentText}
+            />
+          )
+        })}
+      </div>
 
       {isDone && !verdict && messages.length > 0 && (
-        <p className="border-t border-border pt-8 text-center text-[0.8125rem] text-ink-muted">
+        <p className="pt-8 text-center text-[0.8125rem] text-ink-muted">
           Debate complete.
         </p>
       )}

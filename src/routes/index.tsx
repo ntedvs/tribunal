@@ -31,7 +31,7 @@ function Home() {
   }
 
   return (
-    <div className="space-y-20">
+    <div className="mx-auto max-w-3xl space-y-20">
       <CaseForm onSubmit={handleSubmit} />
       <PastTribunals tribunals={past} />
     </div>

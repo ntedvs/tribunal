@@ -42,7 +42,7 @@ function RootComponent() {
             </a>
           </nav>
         </header>
-        <main className="mx-auto max-w-3xl px-8 pt-8 pb-24 md:px-12 lg:px-8">
+        <main className="mx-auto px-8 pt-8 pb-24 md:px-12 lg:px-16">
           <Outlet />
         </main>
         <footer className="mt-auto border-t border-border px-8 py-6 md:px-12 lg:px-16">
